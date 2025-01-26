@@ -41,9 +41,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         return properties.getProperty("bot.token");
     }
 
-    public void sendWeeklyMessage() {
+    public void sendWeeklyMessage(String message) {
         try {
-            execute(new SendMessage(properties.getProperty("bot.chat-id"), "Ваше еженедельное сообщение!"));
+            execute(new SendMessage(properties.getProperty("bot.chat-id"), message));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
