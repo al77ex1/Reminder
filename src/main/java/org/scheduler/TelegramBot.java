@@ -15,6 +15,7 @@ import org.scheduler.exception.ConfigurationException;
 
 public class TelegramBot extends TelegramLongPollingBot {
     private static final Logger log = LoggerFactory.getLogger(TelegramBot.class);
+
     private final Properties properties;
     
     public TelegramBot() {
@@ -32,8 +33,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
-            long chatId = update.getMessage().getChatId();
-            log.info("CHAT_ID: {}", chatId);
+            log.info("Message details: CHAT_ID: {}", update.getMessage().getChatId());
         }
     }
 
