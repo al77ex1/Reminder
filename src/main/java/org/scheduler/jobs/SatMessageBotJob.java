@@ -17,6 +17,6 @@ public class SatMessageBotJob implements Job {
                 То будьте добры - поделитесь драгоценными ссылками из Библии для вашей проповеди в этой группе.
 
                 Так стихи гарантированно будут выведены на экран вовремя во время проповеди.""";
-        bot.sendWeeklyMessage(saturdayMessage);
+        bot.sendMessage(saturdayMessage);
     }
 }

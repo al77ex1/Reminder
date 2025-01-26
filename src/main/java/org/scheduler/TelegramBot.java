@@ -4,6 +4,8 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,7 @@ import java.util.Properties;
 import org.scheduler.exception.ConfigurationException;
 
 public class TelegramBot extends TelegramLongPollingBot {
+    private static final Logger log = LoggerFactory.getLogger(TelegramBot.class);
     private final Properties properties;
     
     public TelegramBot() {
@@ -28,7 +31,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Обработка входящих сообщений
+        if (update.hasMessage()) {
+            long chatId = update.getMessage().getChatId();
+            log.info("CHAT_ID: {}", chatId);
+        }
     }
 
     @Override
@@ -41,11 +47,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         return properties.getProperty("bot.token");
     }
 
-    public void sendWeeklyMessage(String message) {
+    public void sendMessage(String message) {
         try {
             execute(new SendMessage(properties.getProperty("bot.chat-id"), message));
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("Error sending telegram message: {}", e.getMessage(), e);
         }
     }
 }
