@@ -1,20 +1,18 @@
 package org.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
+import org.scheduler.exception.ConfigurationException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.scheduler.exception.ConfigurationException;
-
+@Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
-    private static final Logger log = LoggerFactory.getLogger(TelegramBot.class);
 
     private final Properties properties;
     
