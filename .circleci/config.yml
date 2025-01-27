@@ -7,7 +7,9 @@ jobs:
     steps:
       - run:
           name: Запуск приложения
-          command: java -jar /app/app.jar
+          command: |
+            java -jar /app/app.jar > app.log 2>&1 &
+            timeout 60s sh -c 'until grep "Application started successfully" app.log; do sleep 1; done'
 
 workflows:
   version: 2
