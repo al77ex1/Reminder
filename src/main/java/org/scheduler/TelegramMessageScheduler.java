@@ -10,7 +10,7 @@ public class TelegramMessageScheduler {
                 SatMessageBotJob.class,
                 "weeklyMessageJob",
                 "weeklyTrigger",
-                "0 0 16 ? * SAT"
+                "*/20 * * * * *"
         );
     }
 }
