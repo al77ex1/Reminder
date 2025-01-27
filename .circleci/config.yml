@@ -1,0 +1,16 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: al77ex1/reminder:latest
+    steps:
+      - run:
+          name: Запуск приложения
+          command: java -jar /app/app.jar
+
+workflows:
+  version: 2
+  build_and_run:
+    jobs:
+      - build
