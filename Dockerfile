@@ -1,17 +1,18 @@
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /workspace/app
 
-# Copy configuration files first to cache dependencies
+# Create .m2 directory to cache dependencies
+RUN mkdir -p /root/.m2
+
+# Copy Maven settings and POM first
 COPY pom.xml ./
 
-# Configure Maven repository and download dependencies
-RUN mvn -f ./pom.xml dependency:resolve dependency:resolve-plugins
+# Download all dependencies and plugins
+RUN --mount=type=cache,target=/root/.m2 mvn -B dependency:resolve-plugins dependency:resolve
 
-# Copy source files needed for compilation
+# Copy source files and build
 COPY ./src ./src
-
-# Build the application
-RUN mvn -f ./pom.xml package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 
 # Use a new stage for the runtime
 FROM openjdk:17-jdk-slim
