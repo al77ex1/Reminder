@@ -1,8 +1,6 @@
+# Stage 1: Build
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /workspace/app
-
-# Create .m2 directory to cache dependencies
-RUN mkdir -p /root/.m2
 
 # Copy Maven settings and POM first
 COPY pom.xml ./
@@ -14,8 +12,8 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B dependency:resolve-plugins depend
 COPY ./src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 
-# Use a new stage for the runtime
-FROM openjdk:17-jdk-slim
+# Stage 2: Runtime
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Create logs directory
