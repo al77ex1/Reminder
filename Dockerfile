@@ -19,7 +19,7 @@ WORKDIR /jre
 # Create a custom JRE
 RUN apk add --no-cache binutils && \
     jlink \
-    --add-modules java.base,java.logging,java.xml,java.sql,java.desktop,java.management,java.naming,java.security.jgss,jdk.crypto.ec,java.rmi,java.compiler,java.instrument,java.transaction.xa \
+    --add-modules java.base,java.xml,java.naming,java.desktop,java.rmi,jdk.crypto.ec \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
