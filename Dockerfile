@@ -1,6 +1,9 @@
-# Stage 1: Build
-FROM maven:3.8.5-openjdk-17-slim AS build
+# Stage 1: Build and JRE creation stage
+FROM maven:3-eclipse-temurin-17-alpine
 WORKDIR /workspace/app
+
+# Create .m2 directory to cache dependencies
+RUN mkdir -p /root/.m2
 
 # Copy Maven settings and POM first
 COPY pom.xml ./
@@ -12,43 +15,39 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B dependency:resolve-plugins depend
 COPY ./src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 
-# Stage 2: Create custom JRE
-FROM eclipse-temurin:17-jdk-alpine AS jre-build
-WORKDIR /jre
-
-# Create a custom JRE
-RUN apk add --no-cache binutils && \
-    jlink \
+# Create custom JRE
+RUN "$JAVA_HOME/bin/jlink" \
     --add-modules java.base,java.xml,java.naming,java.desktop,java.rmi,jdk.crypto.ec \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
     --compress=2 \
-    --output minimal-jre
+    --output /custom-jre
 
-# Stage 3: Runtime
-FROM alpine:3.19
+# Stage 2: Final stage
+FROM alpine:3.21
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH=$JAVA_HOME/bin:${PATH}
 WORKDIR /app
 
-# Copy custom JRE from jre-build stage
-COPY --from=jre-build /jre/minimal-jre /opt/java/openjdk
+# Copy custom JRE
+COPY --from=0 /custom-jre $JAVA_HOME
 
-# Create a non-root user
-RUN addgroup -S spring && adduser -S spring -G spring && \
-    # Create logs directory with correct permissions
-    mkdir -p /app/logs && chown -R spring:spring /app
+# Create non-root user
+RUN addgroup -S spring && adduser -S spring -G spring
 
 # Set environment variables
-ENV PATH="/opt/java/openjdk/bin:${PATH}" \
-    JAVA_TOOL_OPTIONS="-Xmx512m"
+ENV TZ=Europe/Moscow
+ENV JAVA_TOOL_OPTIONS="-Xmx512m"
 
 # Copy application files
-COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
-COPY --from=build /workspace/app/target/lib /app/lib
+COPY --from=0 /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
+COPY --from=0 /workspace/app/target/lib /app/lib
 
 # Use non-root user
 USER spring:spring
 
+# Run the application with specific main class
 EXPOSE 8080/tcp
 
 ENTRYPOINT ["java", "-cp", "/app/app.jar:/app/lib/*", "org.scheduler.TelegramMessageScheduler"]
