@@ -29,12 +29,9 @@ RUN "$JAVA_HOME/bin/jlink" \
 FROM alpine:3.21
 WORKDIR /app
 
-# Copy custom JRE
+# Copy custom JRE and application from build stage
 COPY --from=build /jre/minimal-jre /opt/java/openjdk
-
-# Copy application files
 COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
-COPY --from=build /workspace/app/target/lib /app/lib
 
 # Create non-root user
 RUN addgroup -S spring && adduser -S spring -G spring && \
@@ -51,4 +48,4 @@ USER spring
 # Run the application with specific main class
 EXPOSE 8080/tcp
 
-ENTRYPOINT ["java", "-cp", "/app/app.jar:/app/lib/*", "org.scheduler.TelegramMessageScheduler"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
