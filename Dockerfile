@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM maven:3.8.5-openjdk-17-slim AS build
+FROM maven:3-eclipse-temurin-17-alpine AS build
 WORKDIR /workspace/app
 
 # Copy Maven settings and POM first
