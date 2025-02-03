@@ -12,37 +12,33 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B dependency:resolve-plugins depend
 COPY ./src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 
-WORKDIR /jre
-
 # Create a custom JRE
 RUN apk add --no-cache binutils && \
+    cd /opt/java/openjdk && \
     jlink \
     --add-modules java.base,java.xml,java.naming,java.desktop,java.rmi,jdk.crypto.ec \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
     --compress=2 \
-    --output minimal-jre
+    --output /jre/minimal-jre
 
 # Stage 2: Runtime
 FROM alpine:3.19
 WORKDIR /app
 
-# Copy custom JRE from jre-build stage
-COPY --from=build /jre/minimal-jre /opt/java/openjdk
-
-# Create a non-root user
+# Create a non-root user first
 RUN addgroup -S spring && adduser -S spring -G spring && \
-    # Create logs directory with correct permissions
     mkdir -p /app/logs && chown -R spring:spring /app
+
+# Copy JRE and application files in a single layer
+COPY --from=build /jre/minimal-jre /opt/java/openjdk
+COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
+COPY --from=build /workspace/app/target/lib /app/lib
 
 # Set environment variables
 ENV PATH="/opt/java/openjdk/bin:${PATH}" \
     JAVA_TOOL_OPTIONS="-Xmx512m"
-
-# Copy application files
-COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
-COPY --from=build /workspace/app/target/lib /app/lib
 
 # Use non-root user
 USER spring:spring
