@@ -32,8 +32,8 @@ RUN addgroup -S spring && adduser -S spring -G spring && \
     mkdir -p /app/logs && chown -R spring:spring /app
 
 # Copy JRE and application files in a single layer
-COPY --from=build /jre/minimal-jre /opt/java/openjdk
-COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
+COPY --from=build --chown=spring:spring /jre/minimal-jre /opt/java/openjdk
+COPY --from=build --chown=spring:spring /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar /app/app.jar
 
 # Set environment variables
 ENV PATH="/opt/java/openjdk/bin:${PATH}" \
