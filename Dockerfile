@@ -34,7 +34,6 @@ RUN addgroup -S spring && adduser -S spring -G spring && \
 # Copy JRE and application files in a single layer
 COPY --from=build /jre/minimal-jre /opt/java/openjdk
 COPY --from=build /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar ./app.jar
-COPY --from=build /workspace/app/target/lib /app/lib
 
 # Set environment variables
 ENV PATH="/opt/java/openjdk/bin:${PATH}" \
@@ -45,4 +44,4 @@ USER spring:spring
 
 EXPOSE 8080/tcp
 
-ENTRYPOINT ["java", "-cp", "/app/app.jar:/app/lib/*", "org.scheduler.TelegramMessageScheduler"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
