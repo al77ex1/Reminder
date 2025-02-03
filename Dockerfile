@@ -12,8 +12,6 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B dependency:resolve-plugins depend
 COPY ./src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 
-# Stage 2: Create custom JRE
-FROM eclipse-temurin:17-jdk-alpine AS jre-build
 WORKDIR /jre
 
 # Create a custom JRE
@@ -26,12 +24,12 @@ RUN apk add --no-cache binutils && \
     --compress=2 \
     --output minimal-jre
 
-# Stage 3: Runtime
+# Stage 2: Runtime
 FROM alpine:3.19
 WORKDIR /app
 
 # Copy custom JRE from jre-build stage
-COPY --from=jre-build /jre/minimal-jre /opt/java/openjdk
+COPY --from=build /jre/minimal-jre /opt/java/openjdk
 
 # Create a non-root user
 RUN addgroup -S spring && adduser -S spring -G spring && \
