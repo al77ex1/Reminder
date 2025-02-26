@@ -1,16 +1,12 @@
 package org.scheduler;
-import org.quartz.SchedulerException;
-import org.scheduler.jobs.SatMessageBotJob;
-import org.scheduler.jobs.JobExecutor;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class TelegramMessageScheduler {
-    public static void main(String[] args) throws SchedulerException {
-        JobExecutor executor = new JobExecutor();
-        executor.scheduleJob(
-                SatMessageBotJob.class,
-                "weeklyMessageJob",
-                "weeklyTrigger",
-                "0 0 16 ? * SAT"
-        );
+
+    public static void main(String[] args) {
+        SpringApplication.run(TelegramMessageScheduler.class, args);
     }
 }

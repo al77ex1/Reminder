@@ -1,14 +1,16 @@
 package org.scheduler.jobs;
 
 import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JobExecutor {
     private final Scheduler scheduler;
 
-    public JobExecutor() throws SchedulerException {
-        this.scheduler = StdSchedulerFactory.getDefaultScheduler();
-        this.scheduler.start();
+    @Autowired
+    public JobExecutor(Scheduler scheduler) {
+        this.scheduler = scheduler;
     }
 
     public void scheduleJob(Class<? extends Job> jobClass, String jobName, String triggerName, String cronExpression) throws SchedulerException {
