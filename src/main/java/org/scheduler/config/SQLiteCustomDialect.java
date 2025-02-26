@@ -21,6 +21,16 @@ public class SQLiteCustomDialect extends H2Dialect {
             public boolean supportsIdentityColumns() {
                 return true;
             }
+
+            @Override
+            public String getIdentitySelectString(String table, String column, int type) {
+                return "select last_insert_rowid()";
+            }
+
+            @Override
+            public String getIdentityColumnString(int type) {
+                return "integer primary key autoincrement";
+            }
         };
     }
 
