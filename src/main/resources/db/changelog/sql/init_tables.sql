@@ -1,4 +1,4 @@
--- Create notification table
+-- encoding: utf8
 CREATE TABLE notification (
     id              SERIAL PRIMARY KEY,
     job_name        VARCHAR(50) NOT NULL,
