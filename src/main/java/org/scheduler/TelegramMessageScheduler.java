@@ -1,5 +1,6 @@
 package org.scheduler;
 
+import org.scheduler.config.EnvConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TelegramMessageScheduler {
 
     public static void main(String[] args) {
+        EnvConfig.loadEnvVariables();
         SpringApplication.run(TelegramMessageScheduler.class, args);
     }
 }
