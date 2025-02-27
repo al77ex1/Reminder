@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
     
-    <changeSet id="init_tables" author="system" dbms="sqlite">
+    <changeSet id="init_tables" author="system" dbms="postgresql">
         <sqlFile encoding="utf8"
                  path="db/changelog/sql/init_tables.sql"
                  splitStatements="true"
