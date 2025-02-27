@@ -4,6 +4,7 @@ out/
 !**/src/main/**/target/
 !**/src/test/**/target/
 *.sqlite
+.env
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
