@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@Builder(access = lombok.AccessLevel.PUBLIC)
 public class ErrorMessage {
     private LocalDateTime timestamp;
     private int status;
