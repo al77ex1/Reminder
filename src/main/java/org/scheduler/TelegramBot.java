@@ -1,7 +1,7 @@
 package org.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.scheduler.exception.ConfigurationException;
+import org.scheduler.exception.ApplicationRuntimeException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,11 +20,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         properties = new Properties();
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
-                throw new ConfigurationException("Unable to find application.properties");
+                throw new ApplicationRuntimeException("Unable to find application.properties");
             }
             properties.load(input);
         } catch (IOException e) {
-            throw new ConfigurationException("Error loading application.properties", e);
+            throw new ApplicationRuntimeException("Error loading application.properties", e);
         }
     }
 
