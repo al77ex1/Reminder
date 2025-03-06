@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -f ./pom.xml package -DskipTests
 RUN apk add --no-cache binutils && \
     cd /opt/java/openjdk && \
     jlink \
-    --add-modules java.base,java.xml,java.naming,java.desktop,java.rmi,jdk.crypto.ec \
+    --add-modules java.base,java.xml,java.naming,java.desktop,java.rmi,jdk.crypto.ec,java.management,java.management.rmi,java.instrument,java.security.jgss,java.security.sasl,java.sql,java.transaction.xa,java.logging,jdk.unsupported \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
@@ -34,6 +34,9 @@ RUN addgroup -S spring && adduser -S spring -G spring && \
 # Copy JRE and application files in a single layer
 COPY --from=build --chown=spring:spring /jre/minimal-jre /opt/java/openjdk
 COPY --from=build --chown=spring:spring /workspace/app/target/VifaniaNotificationBot-1.0-SNAPSHOT.jar /app/app.jar
+
+# Copy .env file
+COPY --chown=spring:spring .env /app/.env
 
 # Set environment variables
 ENV PATH="/opt/java/openjdk/bin:${PATH}" \
