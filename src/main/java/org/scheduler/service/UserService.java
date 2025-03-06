@@ -91,8 +91,22 @@ public class UserService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new EntityNotFoundException("Роль не найдена"));
         
-        user.getRoles().add(role);
-        return userRepository.save(user);
+        boolean roleAlreadyAssigned = false;
+        for (Role existingRole : user.getRoles()) {
+            if (existingRole.getId().equals(role.getId())) {
+                roleAlreadyAssigned = true;
+                break;
+            }
+        }
+        
+        if (!roleAlreadyAssigned) {
+            Set<Role> updatedRoles = new HashSet<>(user.getRoles());
+            updatedRoles.add(role);
+            user.setRoles(updatedRoles);
+            return userRepository.save(user);
+        }
+        
+        return user;
     }
 
     @Transactional
@@ -100,10 +114,18 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new EntityNotFoundException("Роль не найдена"));
+        if (!roleRepository.findByName(roleName).isPresent()) {
+            throw new EntityNotFoundException("Роль не найдена");
+        }
         
-        user.getRoles().remove(role);
+        Set<Role> updatedRoles = new HashSet<>();
+        for (Role existingRole : user.getRoles()) {
+            if (!existingRole.getName().equals(roleName)) {
+                updatedRoles.add(existingRole);
+            }
+        }
+        
+        user.setRoles(updatedRoles);
         return userRepository.save(user);
     }
 
