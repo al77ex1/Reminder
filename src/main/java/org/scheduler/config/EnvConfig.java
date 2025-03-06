@@ -9,10 +9,7 @@ public class EnvConfig {
     private EnvConfig() {}
 
     public static void loadEnvVariables() {
-        Dotenv dotenv = Dotenv.configure()
-                .ignoreIfMissing()
-                .directory("/app")
-                .load();
+        Dotenv dotenv = Dotenv.load();
         Set<DotenvEntry> entries = dotenv.entries();
 
         for (DotenvEntry entry : entries) {
