@@ -5,5 +5,6 @@ CREATE TABLE notification (
     trigger_name    VARCHAR(50) NOT NULL,
     cron_schedule   VARCHAR(20) NOT NULL,
     message TEXT    NOT NULL,
-    created_at      TIMESTAMP WITHOUT TIME ZONE
+    created_at      TIMESTAMP WITHOUT TIME ZONE,
+    no_active       BOOLEAN DEFAULT FALSE NOT NULL
 );

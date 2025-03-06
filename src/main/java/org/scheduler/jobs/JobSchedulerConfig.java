@@ -21,6 +21,9 @@ public class JobSchedulerConfig {
         List<Notification> notifications = notificationRepository.findAll();
 
         for (Notification notification : notifications) {
+            if (Boolean.TRUE.equals(notification.getNoActive())) {
+                continue;
+            }
             String jobName = notification.getJobName();
             String triggerName = notification.getTriggerName();
             String cronExpression = notification.getCronSchedule();

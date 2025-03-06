@@ -29,4 +29,7 @@ public class Notification {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "no_active", nullable = false)
+    private Boolean noActive = false;
 }
