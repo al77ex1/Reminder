@@ -11,28 +11,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationRequest {
     
-    @Schema(description = "Name of the job associated with this notification", 
-            example = "ChoirRehearsal")
-    @NotBlank(message = "Job name is required")
+    @Schema(description = "Название работы, связанной с этим уведомлением", example = "ChoirRehearsal")
+    @NotBlank(message = "Название работы обязательно")
     private String jobName;
     
-    @Schema(description = "Name of the trigger for this notification", 
-            example = "WeeklyReminder")
-    @NotBlank(message = "Trigger name is required")
+    @Schema(description = "Имя триггера для этого уведомления", example = "WeeklyReminder")
+    @NotBlank(message = "Название триггера обязательно")
     private String triggerName;
     
-    @Schema(description = "Cron schedule expression for the notification", 
-            example = "0 0 18 ? * SAT")
-    @NotBlank(message = "Cron schedule is required")
+    @Schema(description = "Cron выражение для расписания уведомления", example = "0 0 18 ? * SAT")
+    @NotBlank(message = "Cron выражение обязательно")
     private String cronSchedule;
     
-    @Schema(description = "Message content of the notification", 
-            example = "Reminder: Choir rehearsal tomorrow at 10:00 AM")
-    @NotBlank(message = "Message is required")
+    @Schema(description = "Сообщение уведомления", example = "Reminder: Choir rehearsal tomorrow at 10:00 AM")
+    @NotBlank(message = "Сообщение обязательно")
     private String message;
     
-    @Schema(description = "Whether the notification is inactive", 
-            example = "false", 
-            defaultValue = "false")
+    @Schema(description = "Является ли уведомление неактивным", example = "false", defaultValue = "false")
     private Boolean noActive = false;
 }
