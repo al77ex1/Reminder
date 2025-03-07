@@ -2,12 +2,16 @@ package org.scheduler.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.scheduler.controller.interfaces.NotificationApi;
+import org.scheduler.dto.mapper.NotificationMapper.NotificationMapperUtil;
+import org.scheduler.dto.request.NotificationRequest;
+import org.scheduler.dto.response.NotificationResponse;
 import org.scheduler.entity.Notification;
 import org.scheduler.service.NotificationService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,29 +20,46 @@ public class NotificationController implements NotificationApi {
     private final NotificationService notificationService;
 
     @Override
-    public Page<Notification> getNotificationByJobName(Pageable params) {
-        return notificationService.getAllNotifications(params);
+    public ResponseEntity<Page<NotificationResponse>> getNotificationByJobName(Pageable params) {
+        Page<Notification> notificationsPage = notificationService.getAllNotifications(params);
+        
+        Page<NotificationResponse> responsePage = new PageImpl<>(
+            notificationsPage.getContent().stream()
+                .map(NotificationMapperUtil::toResponseStatic)
+                .toList(),
+            notificationsPage.getPageable(),
+            notificationsPage.getTotalElements()
+        );
+        
+        return ResponseEntity.ok(responsePage);
     }
 
     @Override
-    public Notification getNotificationById(Long id) {
-        return notificationService.getNotificationById(id);
+    public ResponseEntity<NotificationResponse> getNotificationById(Integer id) {
+        Notification notification = notificationService.getNotificationById(id.longValue());
+        return ResponseEntity.ok(NotificationMapperUtil.toResponseStatic(notification));
     }
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
-    public Notification createNotification(Notification notification) {
-        return notificationService.createNotification(notification);
+    public ResponseEntity<NotificationResponse> createNotification(NotificationRequest request) {
+        Notification notification = NotificationMapperUtil.toEntityStatic(request);
+        Notification savedNotification = notificationService.createNotification(notification);
+        NotificationResponse response = NotificationMapperUtil.toResponseStatic(savedNotification);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
-    public Notification updateNotification(Long id, Notification notification) {
-        return notificationService.updateNotification(id, notification);
+    public ResponseEntity<NotificationResponse> updateNotification(Integer id, NotificationRequest request) {
+        Notification existingNotification = notificationService.getNotificationById(id.longValue());
+        NotificationMapperUtil.updateEntityStatic(existingNotification, request);
+        Notification updatedNotification = notificationService.updateNotification(id.longValue(), existingNotification);
+        NotificationResponse response = NotificationMapperUtil.toResponseStatic(updatedNotification);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNotification(Long id) {
-        notificationService.deleteNotification(id);
+    public ResponseEntity<Void> deleteNotification(Integer id) {
+        notificationService.deleteNotification(id.longValue());
+        return ResponseEntity.noContent().build();
     }
 }
