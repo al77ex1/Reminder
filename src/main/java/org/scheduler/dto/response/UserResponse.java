@@ -43,4 +43,7 @@ public class UserResponse {
     
     @Schema(description = "Список ролей пользователя")
     private Set<String> roles = new HashSet<>();
+    
+    @Schema(description = "Список прав доступа пользователя")
+    private Set<String> permissions = new HashSet<>();
 }

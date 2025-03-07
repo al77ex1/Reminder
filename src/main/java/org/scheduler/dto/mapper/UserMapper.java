@@ -4,6 +4,7 @@ import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.scheduler.dto.request.UserRequest;
 import org.scheduler.dto.response.UserResponse;
+import org.scheduler.entity.Permission;
 import org.scheduler.entity.Role;
 import org.scheduler.entity.User;
 
@@ -22,6 +23,7 @@ public interface UserMapper {
     User toEntity(UserRequest request);
     
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
+    @Mapping(target = "permissions", expression = "java(mapPermissions(user.getRoles()))")
     UserResponse toResponse(User user);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -36,6 +38,16 @@ public interface UserMapper {
         }
         return roles.stream()
                 .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
+    }
+    
+    default Set<String> mapPermissions(Set<Role> roles) {
+        if (roles == null) {
+            return Set.of();
+        }
+        return roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(Permission::getName)
                 .collect(Collectors.toSet());
     }
     
