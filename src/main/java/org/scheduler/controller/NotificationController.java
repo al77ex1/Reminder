@@ -2,7 +2,7 @@ package org.scheduler.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.scheduler.controller.interfaces.NotificationApi;
-import org.scheduler.dto.mapper.NotificationMapper.NotificationMapperUtil;
+import org.scheduler.dto.mapper.NotificationMapper;
 import org.scheduler.dto.request.NotificationRequest;
 import org.scheduler.dto.response.NotificationResponse;
 import org.scheduler.entity.Notification;
@@ -25,7 +25,7 @@ public class NotificationController implements NotificationApi {
         
         Page<NotificationResponse> responsePage = new PageImpl<>(
             notificationsPage.getContent().stream()
-                .map(NotificationMapperUtil::toResponseStatic)
+                .map(NotificationMapper::toResponseStatic)
                 .toList(),
             notificationsPage.getPageable(),
             notificationsPage.getTotalElements()
@@ -37,23 +37,23 @@ public class NotificationController implements NotificationApi {
     @Override
     public ResponseEntity<NotificationResponse> getNotificationById(Integer id) {
         Notification notification = notificationService.getNotificationById(id.longValue());
-        return ResponseEntity.ok(NotificationMapperUtil.toResponseStatic(notification));
+        return ResponseEntity.ok(NotificationMapper.toResponseStatic(notification));
     }
 
     @Override
     public ResponseEntity<NotificationResponse> createNotification(NotificationRequest request) {
-        Notification notification = NotificationMapperUtil.toEntityStatic(request);
+        Notification notification = NotificationMapper.toEntityStatic(request);
         Notification savedNotification = notificationService.createNotification(notification);
-        NotificationResponse response = NotificationMapperUtil.toResponseStatic(savedNotification);
+        NotificationResponse response = NotificationMapper.toResponseStatic(savedNotification);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
     public ResponseEntity<NotificationResponse> updateNotification(Integer id, NotificationRequest request) {
         Notification existingNotification = notificationService.getNotificationById(id.longValue());
-        NotificationMapperUtil.updateEntityStatic(existingNotification, request);
+        NotificationMapper.updateEntityStatic(existingNotification, request);
         Notification updatedNotification = notificationService.updateNotification(id.longValue(), existingNotification);
-        NotificationResponse response = NotificationMapperUtil.toResponseStatic(updatedNotification);
+        NotificationResponse response = NotificationMapper.toResponseStatic(updatedNotification);
         return ResponseEntity.ok(response);
     }
 

@@ -1,6 +1,7 @@
 package org.scheduler.dto.mapper;
 
 import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 import org.scheduler.dto.request.NotificationRequest;
 import org.scheduler.dto.response.NotificationResponse;
 import org.scheduler.entity.Notification;
@@ -23,30 +24,25 @@ public interface NotificationMapper {
     @Mapping(target = "createdAt", ignore = true)
     void updateEntity(@MappingTarget Notification notification, NotificationRequest request);
     
-    class NotificationMapperUtil {
-        private NotificationMapperUtil() {
-            // Private constructor to prevent instantiation
-        }
-        
-        private static final NotificationMapper INSTANCE = 
-            org.mapstruct.factory.Mappers.getMapper(NotificationMapper.class);
-            
-        public static void updateEntityStatic(Notification notification, NotificationRequest request) {
-            INSTANCE.updateEntity(notification, request);
-        }
-        
-        public static Notification toEntityStatic(NotificationRequest request) {
-            return INSTANCE.toEntity(request);
-        }
-        
-        public static NotificationResponse toResponseStatic(Notification notification) {
-            return INSTANCE.toResponse(notification);
-        }
-        
-        public static List<NotificationResponse> toResponseListStatic(List<Notification> notifications) {
-            return notifications.stream()
-                .map(INSTANCE::toResponse)
-                .toList();
-        }
+    static NotificationMapper getInstance() {
+        return Mappers.getMapper(NotificationMapper.class);
+    }
+    
+    static void updateEntityStatic(Notification notification, NotificationRequest request) {
+        getInstance().updateEntity(notification, request);
+    }
+    
+    static Notification toEntityStatic(NotificationRequest request) {
+        return getInstance().toEntity(request);
+    }
+    
+    static NotificationResponse toResponseStatic(Notification notification) {
+        return getInstance().toResponse(notification);
+    }
+    
+    static List<NotificationResponse> toResponseListStatic(List<Notification> notifications) {
+        return notifications.stream()
+            .map(getInstance()::toResponse)
+            .toList();
     }
 }
