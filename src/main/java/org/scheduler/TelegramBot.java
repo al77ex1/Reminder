@@ -2,6 +2,8 @@ package org.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.scheduler.exception.ApplicationRuntimeException;
+import org.scheduler.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -15,6 +17,9 @@ import java.util.Properties;
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final Properties properties;
+    
+    @Autowired
+    private AuthService authService;
     
     public TelegramBot() {
         properties = new Properties();
@@ -42,6 +47,20 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (username.isEmpty()) username = "Unknown";
             }
             log.info("Message received: CHAT_ID: {} от @{} : {}", update.getMessage().getChatId(), username, messageText);
+            
+            // Handle /auth command
+            if (messageText.startsWith("/auth")) {
+                handleAuthCommand(username, update.getMessage().getChatId());
+            }
+        }
+    }
+    
+    private void handleAuthCommand(String username, Long chatId) {
+        String result = authService.generateAuthLink(username);
+        try {
+            execute(new SendMessage(chatId.toString(), result));
+        } catch (TelegramApiException e) {
+            log.error("Error sending telegram message: {}", e.getMessage(), e);
         }
     }
 
