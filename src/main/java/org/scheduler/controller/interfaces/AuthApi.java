@@ -6,13 +6,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.scheduler.dto.response.AuthTokenResponse;
 import org.scheduler.interceptor.ErrorMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Map;
 
 @Tag(name = "Authentication", description = "Operations related to authentication")
 @RequestMapping("/api/auth")
@@ -25,7 +24,8 @@ public interface AuthApi {
     )
     @ApiResponse(
         responseCode = "200", 
-        description = "Authentication successful"
+        description = "Authentication successful",
+        content = @Content(schema = @Schema(implementation = AuthTokenResponse.class))
     )
     @ApiResponse(
         responseCode = "401", 
@@ -42,7 +42,7 @@ public interface AuthApi {
         description = "Server error",
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
-    ResponseEntity<Map<String, String>> authenticateByToken(
+    ResponseEntity<AuthTokenResponse> authenticateByToken(
         @Parameter(description = "One-time authentication token") @RequestParam String token
     );
 }
