@@ -18,13 +18,8 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<Map<String, String>> authenticateByToken(String token) {
-        log.info("Authentication request with one-time token");
-        try {
-            Map<String, String> tokens = authService.validateOneTimeTokenAndGenerateJwt(token);
-            return ResponseEntity.ok(tokens);
-        } catch (IllegalArgumentException e) {
-            log.warn("Authentication failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        log.info("Authentication request with one-time token: {}", token);
+        Map<String, String> tokens = authService.validateOneTimeTokenAndGenerateJwt(token);
+        return ResponseEntity.ok(tokens);
     }
 }

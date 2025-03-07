@@ -1,5 +1,7 @@
 package org.scheduler.interceptor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.scheduler.exception.ApplicationRuntimeException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +10,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(ApplicationRuntimeException.class)
+    public ResponseEntity<ErrorMessage> handleApplicationRuntimeException(ApplicationRuntimeException ex) {
+        log.error("Authentication error: {}", ex.getMessage());
+        ErrorMessage errorMessage = ErrorMessage.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("Authentication Failed")
+                .message(ex.getMessage())
+                .build();
+
+        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ErrorMessage> handlePropertyReferenceException(PropertyReferenceException ex) {

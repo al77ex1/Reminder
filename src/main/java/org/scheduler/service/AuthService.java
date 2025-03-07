@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.scheduler.entity.User;
+import org.scheduler.exception.ApplicationRuntimeException;
 import org.scheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -68,17 +69,17 @@ public class AuthService {
         
         if (tokenInfo == null) {
             log.warn("One-time token not found: {}", oneTimeToken);
-            throw new IllegalArgumentException("Invalid or expired token");
+            throw new ApplicationRuntimeException("Invalid or expired token");
         }
         
         if (tokenInfo.getExpiryDate().before(new Date())) {
             log.warn("One-time token expired: {}", oneTimeToken);
             oneTimeTokens.remove(oneTimeToken);
-            throw new IllegalArgumentException("Token expired");
+            throw new ApplicationRuntimeException("Token expired");
         }
         
         User user = userRepository.findByTelegram(tokenInfo.getTelegramUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ApplicationRuntimeException("User not found"));
         
         oneTimeTokens.remove(oneTimeToken);
         
