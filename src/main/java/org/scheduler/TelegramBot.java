@@ -36,7 +36,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (username == null) {
                 String firstName = update.getMessage().getFrom().getFirstName();
                 String lastName = update.getMessage().getFrom().getLastName();
-                username = (firstName != null ? firstName : "") + 
+                username = firstName + 
                           (lastName != null ? " " + lastName : "");
                 username = username.trim();
                 if (username.isEmpty()) username = "Unknown";
