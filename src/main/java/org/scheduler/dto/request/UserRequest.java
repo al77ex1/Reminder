@@ -1,6 +1,7 @@
 package org.scheduler.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class UserRequest {
     
     @Schema(description = "Имя пользователя", 
-            example = "Иван", 
-            requiredMode = Schema.RequiredMode.REQUIRED)
+            example = "Иван")
+    @NotBlank(message = "Имя пользователя обязательно")
     private String name;
     
     @Schema(description = "Фамилия пользователя", 
@@ -24,6 +25,7 @@ public class UserRequest {
     
     @Schema(description = "Имя пользователя в Telegram", 
             example = "ivan_ivanov")
+    @NotBlank(message = "Имя пользователя в Telegram обязательно")
     private String telegram;
     
     @Schema(description = "Статус активности пользователя (true - неактивен, false - активен)", 
