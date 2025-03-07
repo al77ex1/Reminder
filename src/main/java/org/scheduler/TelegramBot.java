@@ -30,8 +30,18 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage()) {
-            log.info("Message details: CHAT_ID: {}", update.getMessage().getChatId());
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageText = update.getMessage().getText();
+            String username = update.getMessage().getFrom().getUserName();
+            if (username == null) {
+                String firstName = update.getMessage().getFrom().getFirstName();
+                String lastName = update.getMessage().getFrom().getLastName();
+                username = (firstName != null ? firstName : "") + 
+                          (lastName != null ? " " + lastName : "");
+                username = username.trim();
+                if (username.isEmpty()) username = "Unknown";
+            }
+            log.info("Message received: CHAT_ID: {} от @{} : {}", update.getMessage().getChatId(), username, messageText);
         }
     }
 
