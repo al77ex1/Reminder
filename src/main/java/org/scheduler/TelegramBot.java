@@ -1,7 +1,6 @@
 package org.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.scheduler.exception.ApplicationRuntimeException;
 import org.scheduler.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -9,28 +8,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
 
-    private final Properties properties;
-    
     @Autowired
     private AuthService authService;
     
     public TelegramBot() {
-        properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
-            if (input == null) {
-                throw new ApplicationRuntimeException("Unable to find application.properties");
-            }
-            properties.load(input);
-        } catch (IOException e) {
-            throw new ApplicationRuntimeException("Error loading application.properties", e);
-        }
+        // Constructor is now empty as we're using environment variables directly
     }
 
     @Override
@@ -65,17 +50,17 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return properties.getProperty("bot.username");
+        return System.getProperty("BOT_USERNAME");
     }
 
     @Override
     public String getBotToken() {
-        return properties.getProperty("bot.token");
+        return System.getProperty("BOT_TOKEN");
     }
 
     public void sendMessage(String message) {
         try {
-            execute(new SendMessage(properties.getProperty("bot.chat-id"), message));
+            execute(new SendMessage(System.getProperty("BOT_CHAT_ID"), message));
         } catch (TelegramApiException e) {
             log.error("Error sending telegram message: {}", e.getMessage(), e);
         }
