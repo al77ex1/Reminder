@@ -63,3 +63,19 @@ INSERT INTO permissions (name, description) VALUES
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r, permissions p
 WHERE r.name = 'ADMIN';
+
+-- Initial notification for weekly message job
+INSERT INTO notification (job_name, trigger_name, cron_schedule, message, created_at)
+VALUES (
+    'weeklyMessageJob',
+    'weeklyTrigger',
+    '0 0 16 ? * SAT',
+    'Дорогие проповедники!
+
+Если у кого есть готовая проповедь на ближайшее воскресенье.
+
+То будьте добры - поделитесь драгоценными ссылками из Библии для вашей проповеди в этой группе.
+
+Все что будет в телеграме, то и будет на экране.',
+    NOW()
+);
