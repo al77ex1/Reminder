@@ -48,7 +48,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
             log.info("Message received: CHAT_ID: {} от @{} : {}", update.getMessage().getChatId(), username, messageText);
             
-            // Handle /auth command
             if (messageText.startsWith("/auth")) {
                 handleAuthCommand(username, update.getMessage().getChatId());
             }
