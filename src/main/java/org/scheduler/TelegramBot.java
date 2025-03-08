@@ -6,9 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
+
 @Slf4j
+
 public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
@@ -35,16 +41,63 @@ public class TelegramBot extends TelegramLongPollingBot {
             
             if (messageText.startsWith("/auth")) {
                 handleAuthCommand(username, update.getMessage().getChatId());
+            } else if (messageText.startsWith("/start")) {
+                handleStartCommand(update.getMessage().getChatId());
+            } else if (messageText.startsWith("/register")) {
+                handleRegisterCommand(username, update.getMessage().getChatId());
             }
         }
     }
     
     private void handleAuthCommand(String username, Long chatId) {
-        String result = authService.generateAuthLink(username);
+        String authLink = authService.generateAuthLink(username);
+        log.info(authLink);
         try {
-            execute(new SendMessage(chatId.toString(), result));
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId.toString());
+            message.setText("<a href=\"" + authLink + "\">Авторизоваться</a>");
+            message.setParseMode("HTML");
+            execute(message);
         } catch (TelegramApiException e) {
             log.error("Error sending telegram message: {}", e.getMessage(), e);
+        }
+    }
+    
+    private void handleRegisterCommand(String username, Long chatId) {
+        try {
+            execute(new SendMessage(chatId.toString(), "Запрос на регистрацию принят. После модерации вы получите уведомление."));
+        } catch (TelegramApiException e) {
+            log.error("Error sending registration message: {}", e.getMessage(), e);
+        }
+    }
+    
+    private void handleStartCommand(Long chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText("Добро пожаловать! Нажмите на кнопку ниже для аутентификации или регистрации.");
+        
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setSelective(true);
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setOneTimeKeyboard(false);
+        
+        ArrayList<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow row = new KeyboardRow();
+        
+        KeyboardButton authButton = new KeyboardButton("/auth");
+        KeyboardButton registerButton = new KeyboardButton("/register");
+        row.add(authButton);
+        row.add(registerButton);
+        
+        keyboard.add(row);
+        
+        keyboardMarkup.setKeyboard(keyboard);
+        message.setReplyMarkup(keyboardMarkup);
+        
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Error sending start message: {}", e.getMessage(), e);
         }
     }
 
