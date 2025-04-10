@@ -54,10 +54,10 @@ public interface UserApi {
         @Parameter(description = "ID пользователя") @PathVariable Long id
     );
 
-    @GetMapping("/telegram/{telegram}")
+    @GetMapping("/telegram-username/{telegramUserName}")
     @Operation(
-        summary = "Получить пользователя по имени в Telegram",
-        description = "Предоставляет информацию о пользователе по его имени в Telegram"
+        summary = "Получить пользователя по имени пользователя в Telegram",
+        description = "Предоставляет информацию о пользователе по его имени пользователя в Telegram"
     )
     @ApiResponse(
         responseCode = "200", 
@@ -69,27 +69,27 @@ public interface UserApi {
         description = "Пользователь не найден",
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
-    ResponseEntity<UserResponse> getUserByTelegram(
-        @Parameter(description = "Имя пользователя в Telegram") @PathVariable String telegram
+    ResponseEntity<UserResponse> getUserByTelegramUserName(
+        @Parameter(description = "Имя пользователя в Telegram") @PathVariable String telegramUserName
     );
 
-    @PostMapping
+    @GetMapping("/telegram-id/{telegramUserId}")
     @Operation(
-        summary = "Создать нового пользователя",
-        description = "Создает нового пользователя с указанными параметрами"
+        summary = "Получить пользователя по ID в Telegram",
+        description = "Предоставляет информацию о пользователе по его ID в Telegram"
     )
     @ApiResponse(
-        responseCode = "201", 
-        description = "Пользователь успешно создан",
+        responseCode = "200", 
+        description = "Успешное получение пользователя",
         content = @Content(schema = @Schema(implementation = UserResponse.class))
     )
     @ApiResponse(
-        responseCode = "400", 
-        description = "Некорректные данные запроса",
+        responseCode = "404", 
+        description = "Пользователь не найден",
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
-    ResponseEntity<UserResponse> createUser(
-        @Parameter(description = "Данные нового пользователя") @RequestBody UserRequest request
+    ResponseEntity<UserResponse> getUserByTelegramUserId(
+        @Parameter(description = "ID пользователя в Telegram") @PathVariable Long telegramUserId
     );
 
     @PutMapping("/{id}")

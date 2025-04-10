@@ -14,7 +14,9 @@ CREATE TABLE users (
     id              SERIAL PRIMARY KEY,
     name            VARCHAR(100) NOT NULL,
     last_name       VARCHAR(100),
-    telegram        VARCHAR(100) UNIQUE,
+    telegram_user_name VARCHAR(100) UNIQUE,
+    telegram_user_id BIGINT UNIQUE,
+    chat_id         BIGINT,
     created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     no_active       BOOLEAN DEFAULT FALSE NOT NULL
 );

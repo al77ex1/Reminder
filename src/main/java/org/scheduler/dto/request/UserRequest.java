@@ -26,7 +26,15 @@ public class UserRequest {
     @Schema(description = "Имя пользователя в Telegram", 
             example = "ivan_ivanov")
     @NotBlank(message = "Имя пользователя в Telegram обязательно")
-    private String telegram;
+    private String telegramUserName;
+    
+    @Schema(description = "ID пользователя в Telegram", 
+            example = "123456789")
+    private Long telegramUserId;
+    
+    @Schema(description = "ID чата в Telegram", 
+            example = "123456789")
+    private Long chatId;
     
     @Schema(description = "Статус активности пользователя (true - неактивен, false - активен)", 
             example = "false")

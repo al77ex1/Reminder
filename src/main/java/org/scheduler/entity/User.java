@@ -3,15 +3,19 @@ package org.scheduler.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users") // Используем "users" вместо "user", так как "user" - зарезервированное слово в некоторых БД
+@Table(name = "users")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +28,14 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "telegram", unique = true)
-    private String telegram;
+    @Column(name = "telegram_user_name", unique = true)
+    private String telegramUserName;
+    
+    @Column(name = "telegram_user_id", unique = true)
+    private Long telegramUserId;
+    
+    @Column(name = "chat_id")
+    private Long chatId;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

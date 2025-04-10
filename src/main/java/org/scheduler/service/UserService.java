@@ -34,15 +34,32 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserByTelegram(String telegram) {
-        return userRepository.findByTelegram(telegram)
+    public User getUserByTelegramUserName(String telegramUserName) {
+        return userRepository.findByTelegramUserName(telegramUserName)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+    
+    @Transactional(readOnly = true)
+    public User getUserByTelegramUserId(Long telegramUserId) {
+        return userRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByTelegramUserId(Long telegramUserId) {
+        return userRepository.existsByTelegramUserId(telegramUserId);
     }
 
     @Transactional
     public User createUser(User user) {
-        if (user.getTelegram() != null && userRepository.existsByTelegram(user.getTelegram())) {
-            throw new IllegalArgumentException("Пользователь с таким Telegram уже существует");
+        // Проверяем уникальность telegramUserName
+        if (user.getTelegramUserName() != null && userRepository.existsByTelegramUserName(user.getTelegramUserName())) {
+            throw new IllegalArgumentException("Пользователь с таким Telegram username уже существует");
+        }
+        
+        // Проверяем уникальность telegramUserId
+        if (user.getTelegramUserId() != null && userRepository.existsByTelegramUserId(user.getTelegramUserId())) {
+            throw new IllegalArgumentException("Пользователь с таким Telegram ID уже существует");
         }
         
         user.setId(null);
@@ -61,15 +78,22 @@ public class UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         
-        // Проверяем, не занят ли новый Telegram другим пользователем
-        if (user.getTelegram() != null && !user.getTelegram().equals(existingUser.getTelegram()) 
-                && userRepository.existsByTelegram(user.getTelegram())) {
-            throw new IllegalArgumentException("Пользователь с таким Telegram уже существует");
+        // Проверяем, не занят ли новый telegramUserName другим пользователем
+        if (user.getTelegramUserName() != null && !user.getTelegramUserName().equals(existingUser.getTelegramUserName()) 
+                && userRepository.existsByTelegramUserName(user.getTelegramUserName())) {
+            throw new IllegalArgumentException("Пользователь с таким Telegram username уже существует");
+        }
+        
+        // Проверяем, не занят ли новый telegramUserId другим пользователем
+        if (user.getTelegramUserId() != null && !user.getTelegramUserId().equals(existingUser.getTelegramUserId()) 
+                && userRepository.existsByTelegramUserId(user.getTelegramUserId())) {
+            throw new IllegalArgumentException("Пользователь с таким Telegram ID уже существует");
         }
         
         existingUser.setName(user.getName());
         existingUser.setLastName(user.getLastName());
-        existingUser.setTelegram(user.getTelegram());
+        existingUser.setTelegramUserName(user.getTelegramUserName());
+        existingUser.setTelegramUserId(user.getTelegramUserId());
         existingUser.setNoActive(user.getNoActive());
         
         return userRepository.save(existingUser);

@@ -10,7 +10,6 @@ import org.scheduler.entity.User;
 import org.scheduler.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,16 +36,15 @@ public class UserController implements UserApi {
     }
 
     @Override
-    public ResponseEntity<UserResponse> getUserByTelegram(String telegram) {
-        User user = userService.getUserByTelegram(telegram);
+    public ResponseEntity<UserResponse> getUserByTelegramUserName(String telegramUserName) {
+        User user = userService.getUserByTelegramUserName(telegramUserName);
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
-
+    
     @Override
-    public ResponseEntity<UserResponse> createUser(UserRequest request) {
-        User user = userMapper.toEntity(request);
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.toResponse(createdUser));
+    public ResponseEntity<UserResponse> getUserByTelegramUserId(Long telegramUserId) {
+        User user = userService.getUserByTelegramUserId(telegramUserId);
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @Override

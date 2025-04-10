@@ -31,7 +31,15 @@ public class UserResponse {
     
     @Schema(description = "Имя пользователя в Telegram", 
             example = "ivan_ivanov")
-    private String telegram;
+    private String telegramUserName;
+    
+    @Schema(description = "ID пользователя в Telegram", 
+            example = "123456789")
+    private Long telegramUserId;
+    
+    @Schema(description = "ID чата в Telegram", 
+            example = "123456789")
+    private Long chatId;
     
     @Schema(description = "Дата создания пользователя", 
             example = "2025-03-07T14:30:15")

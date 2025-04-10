@@ -2,6 +2,8 @@ package org.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.scheduler.service.AuthService;
+import org.scheduler.service.UserService;
+import org.scheduler.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,6 +21,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private AuthService authService;
+    
+    @Autowired
+    private UserService userService;
     
     public TelegramBot() {
         // Constructor is now empty as we're using environment variables directly
@@ -40,34 +45,69 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.info("Message received: CHAT_ID: {} от @{} : {}", update.getMessage().getChatId(), username, messageText);
             
             if (messageText.startsWith("/auth")) {
-                handleAuthCommand(username, update.getMessage().getChatId());
+                handleAuthCommand(update);
             } else if (messageText.startsWith("/start")) {
                 handleStartCommand(update.getMessage().getChatId());
             } else if (messageText.startsWith("/register")) {
-                handleRegisterCommand(username, update.getMessage().getChatId());
+                handleRegisterCommand(update);
             }
         }
     }
     
-    private void handleAuthCommand(String username, Long chatId) {
-        String authLink = authService.generateAuthLink(username);
-        log.info(authLink);
+    private void handleAuthCommand(Update update) {
+        Long chatId = update.getMessage().getChatId();
+        Long userId = update.getMessage().getFrom().getId();
+        
         try {
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId.toString());
-            message.setText("<a href=\"" + authLink + "\">Авторизоваться</a>");
-            message.setParseMode("HTML");
-            execute(message);
+            String authLink = authService.generateAuthLinkByUserId(userId);
+            
+            if (authLink.startsWith("User not found")) {
+                execute(new SendMessage(chatId.toString(), authLink));
+                return;
+            }
+            
+            execute(new SendMessage(chatId.toString(), "Ссылка для авторизации: " + authLink));
         } catch (TelegramApiException e) {
             log.error("Error sending telegram message: {}", e.getMessage(), e);
         }
     }
     
-    private void handleRegisterCommand(String username, Long chatId) {
+    private void handleRegisterCommand(Update update) {
+        String telegramUserName = update.getMessage().getFrom().getUserName();
+        Long telegramUserId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
+        String lastName = update.getMessage().getFrom().getLastName();
+
+        log.info("Register command received for user: {}", update);
+
         try {
-            execute(new SendMessage(chatId.toString(), "Запрос на регистрацию принят. После модерации вы получите уведомление."));
-        } catch (TelegramApiException e) {
-            log.error("Error sending registration message: {}", e.getMessage(), e);
+            // Проверяем, существует ли пользователь с таким telegramUserId
+            if (userService.existsByTelegramUserId(telegramUserId)) {
+                execute(new SendMessage(chatId.toString(), "Вы уже зарегистрированы!"));
+                return;
+            }
+            
+            // Создаем нового пользователя
+            User user = User.builder()
+                    .telegramUserId(telegramUserId)
+                    .telegramUserName(telegramUserName)
+                    .name(firstName)
+                    .lastName(lastName)
+                    .chatId(chatId)
+                    .noActive(false)
+                    .build();
+            
+            userService.createUser(user);
+            
+            execute(new SendMessage(chatId.toString(), "Регистрация успешно завершена!"));
+        } catch (Exception e) {
+            log.error("Error during registration: {}", e.getMessage(), e);
+            try {
+                execute(new SendMessage(chatId.toString(), "Произошла ошибка при регистрации. Пожалуйста, попробуйте позже."));
+            } catch (TelegramApiException ex) {
+                log.error("Error sending error message: {}", ex.getMessage(), ex);
+            }
         }
     }
     

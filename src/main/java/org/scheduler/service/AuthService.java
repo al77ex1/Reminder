@@ -41,26 +41,28 @@ public class AuthService {
     
     private final Map<String, AuthTokenInfo> oneTimeTokens = new ConcurrentHashMap<>();
     
-    public String generateAuthLink(String telegramUsername) {
-        boolean userExists = userRepository.existsByTelegram(telegramUsername);
+    public String generateAuthLinkByUserId(Long telegramUserId) {
+        boolean userExists = userRepository.existsByTelegramUserId(telegramUserId);
         
         if (userExists) {
-            String oneTimeToken = generateOneTimeToken(telegramUsername);
+            User user = userRepository.findByTelegramUserId(telegramUserId)
+                    .orElseThrow(() -> new ApplicationRuntimeException("User not found"));
+            String oneTimeToken = generateOneTimeToken(user.getTelegramUserName());
             return frontendUrl + "/auth?token=" + oneTimeToken;
         } else {
             return "User not found. Contact administrator to register.";
         }
     }
     
-    private String generateOneTimeToken(String telegramUsername) {
+    private String generateOneTimeToken(String telegramUserName) {
         String token = UUID.randomUUID().toString();
         Date expiryDate = Date.from(
             LocalDateTime.now().plusSeconds(authLinkExpiration)
                 .atZone(ZoneId.systemDefault()).toInstant());
         
-        oneTimeTokens.put(token, new AuthTokenInfo(telegramUsername, expiryDate));
+        oneTimeTokens.put(token, new AuthTokenInfo(telegramUserName, expiryDate));
         
-        log.info("Generated one-time token for user: {}", telegramUsername);
+        log.info("Generated one-time token for user: {}", telegramUserName);
         return token;
     }
     
@@ -78,7 +80,7 @@ public class AuthService {
             throw new ApplicationRuntimeException("Token expired");
         }
         
-        User user = userRepository.findByTelegram(tokenInfo.getTelegramUsername())
+        User user = userRepository.findByTelegramUserName(tokenInfo.getTelegramUserName())
                 .orElseThrow(() -> new ApplicationRuntimeException("User not found"));
         
         oneTimeTokens.remove(oneTimeToken);
@@ -90,7 +92,7 @@ public class AuthService {
         tokens.put("accessToken", accessToken);
         tokens.put("refreshToken", refreshToken);
         
-        log.info("Generated JWT tokens for user: {}", user.getTelegram());
+        log.info("Generated JWT tokens for user: {}", user.getTelegramUserName());
         return tokens;
     }
     
@@ -100,7 +102,7 @@ public class AuthService {
         
         return Jwts.builder()
                 .setSubject(user.getId().toString())
-                .claim("username", user.getTelegram())
+                .claim("username", user.getTelegramUserName())
                 .claim("roles", getRoleNames(user))
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -132,16 +134,16 @@ public class AuthService {
     }
     
     private static class AuthTokenInfo {
-        private final String telegramUsername;
+        private final String telegramUserName;
         private final Date expiryDate;
         
-        public AuthTokenInfo(String telegramUsername, Date expiryDate) {
-            this.telegramUsername = telegramUsername;
+        public AuthTokenInfo(String telegramUserName, Date expiryDate) {
+            this.telegramUserName = telegramUserName;
             this.expiryDate = expiryDate;
         }
         
-        public String getTelegramUsername() {
-            return telegramUsername;
+        public String getTelegramUserName() {
+            return telegramUserName;
         }
         
         public Date getExpiryDate() {
