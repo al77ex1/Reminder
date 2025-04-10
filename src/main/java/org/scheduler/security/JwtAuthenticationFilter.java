@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,22 +20,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     @Value("${auth.jwt.secret}")
     private String jwtSecret;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            log.debug("JWT from request: {}", jwt != null ? "present" : "null");
+            log.info("JWT from request: {}", jwt != null ? "present" : "null");
 
             if (StringUtils.hasText(jwt) && validateToken(jwt)) {
                 Claims claims = extractClaims(jwt);
@@ -45,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 setAuthentication(userId, authorities);
             } else {
-                log.debug("No valid JWT token found in request");
+                log.info("No valid JWT token found in request");
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
@@ -64,26 +61,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private void setAuthentication(String userId, List<SimpleGrantedAuthority> authorities) {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId, null, authorities);
-
+            userId, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.debug("Set authentication in SecurityContext: {}", authentication);
+        log.info("User authenticated with ID: {}", userId);
     }
     
     private List<SimpleGrantedAuthority> getAuthoritiesFromClaims(Claims claims) {
-        log.debug("JWT claims: {}", claims);
+        // Сначала пробуем получить разрешения
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>(extractPermissionsFromClaims(claims));
         
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        
-        // Сначала пробуем извлечь разрешения
-        authorities.addAll(extractPermissionsFromClaims(claims));
-        
-        // Если разрешений нет, пробуем использовать роли
+        // Если разрешений нет, пробуем получить роли
         if (authorities.isEmpty()) {
-            authorities.addAll(extractRolesFromClaims(claims));
+            authorities = new ArrayList<>(extractRolesFromClaims(claims));
         }
         
-        log.debug("Final authorities: {}", authorities);
         return authorities;
     }
     
@@ -93,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return Collections.emptyList();
         }
         
-        log.debug("Found permissions claim in JWT");
+        log.info("Found permissions claim in JWT");
         try {
             @SuppressWarnings("unchecked")
             List<String> permissions = claims.get("permissions", List.class);
@@ -102,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return Collections.emptyList();
             }
             
-            log.debug("Permissions from JWT: {}", permissions);
+            log.info("Permissions from JWT: {}", permissions);
             return permissions.stream()
                     .map(SimpleGrantedAuthority::new)
                     .toList();
@@ -114,20 +105,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private List<SimpleGrantedAuthority> extractRolesFromClaims(Claims claims) {
         if (!claims.containsKey("roles")) {
-            log.debug("No roles claim found in JWT");
+            log.info("No roles claim found in JWT");
             return Collections.emptyList();
         }
         
-        log.debug("No permissions found, trying to use roles");
+        log.info("No permissions found, trying to use roles");
         try {
             @SuppressWarnings("unchecked")
             List<String> roles = claims.get("roles", List.class);
             if (roles == null || roles.isEmpty()) {
-                log.debug("Roles list is empty or null");
+                log.info("Roles list is empty or null");
                 return Collections.emptyList();
             }
             
-            log.debug("Roles from JWT: {}", roles);
+            log.info("Roles from JWT: {}", roles);
             // Добавляем роли как разрешения с префиксом ROLE_
             return roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -145,17 +136,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
+    
     private boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(jwtSecret.getBytes())
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(jwtSecret.getBytes()).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            log.error("JWT token validation failed", e);
+            log.error("Invalid JWT token: {}", e.getMessage());
+            return false;
         }
-        return false;
     }
 }

@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -105,11 +104,7 @@ public class AuthService {
         
         List<String> roleNames = getRoleNames(user);
         List<String> permissionNames = getPermissionNames(user);
-        
-        log.debug("Generating token for user: {}", user.getTelegramUserName());
-        log.debug("User roles: {}", roleNames);
-        log.debug("User permissions: {}", permissionNames);
-        
+
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("username", user.getTelegramUserName())
@@ -144,7 +139,7 @@ public class AuthService {
         Set<Permission> permissions = new HashSet<>();
         
         for (Role role : user.getRoles()) {
-            log.debug("Processing role: {}", role.getName());
+            log.info("Processing role: {}", role.getName());
             permissions.addAll(role.getPermissions());
         }
         
