@@ -1,10 +1,12 @@
 package org.scheduler.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.scheduler.dto.response.JobResponse;
+import org.scheduler.exception.JobOperationException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,6 +17,11 @@ import java.util.*;
 public class JobService {
 
     private final Scheduler scheduler;
+    private static final String DEFAULT_GROUP = "DEFAULT";
+    private static final String JOB_NOT_FOUND_MESSAGE = "Задание не найдено: ";
+    private static final String PAUSE_ERROR_MESSAGE = "Ошибка при приостановке задания: ";
+    private static final String RESUME_ERROR_MESSAGE = "Ошибка при возобновлении задания: ";
+    private static final String TRIGGER_ERROR_MESSAGE = "Ошибка при запуске задания: ";
 
     public List<JobResponse> getAllJobs() {
         try {
@@ -87,6 +94,80 @@ public class JobService {
             log.info("Error getting running jobs: {}", e.getMessage());
             return Collections.emptyList();
         }
+    }
+    
+    public JobResponse pauseJob(String jobName, String groupName) {
+        try {
+            JobKey jobKey = getJobKey(jobName, groupName);
+            
+            if (!scheduler.checkExists(jobKey)) {
+                throw new EntityNotFoundException(JOB_NOT_FOUND_MESSAGE + jobName);
+            }
+            
+            scheduler.pauseJob(jobKey);
+            log.info("Job paused: {}", jobKey);
+            
+            return getJobResponseByKey(jobKey);
+        } catch (SchedulerException e) {
+            log.info("Error pausing job {}: {}", jobName, e.getMessage());
+            throw new JobOperationException(PAUSE_ERROR_MESSAGE + e.getMessage(), e);
+        }
+    }
+    
+    public JobResponse resumeJob(String jobName, String groupName) {
+        try {
+            JobKey jobKey = getJobKey(jobName, groupName);
+            
+            if (!scheduler.checkExists(jobKey)) {
+                throw new EntityNotFoundException(JOB_NOT_FOUND_MESSAGE + jobName);
+            }
+            
+            scheduler.resumeJob(jobKey);
+            log.info("Job resumed: {}", jobKey);
+            
+            return getJobResponseByKey(jobKey);
+        } catch (SchedulerException e) {
+            log.info("Error resuming job {}: {}", jobName, e.getMessage());
+            throw new JobOperationException(RESUME_ERROR_MESSAGE + e.getMessage(), e);
+        }
+    }
+    
+    public JobResponse triggerJob(String jobName, String groupName) {
+        try {
+            JobKey jobKey = getJobKey(jobName, groupName);
+            
+            if (!scheduler.checkExists(jobKey)) {
+                throw new EntityNotFoundException(JOB_NOT_FOUND_MESSAGE + jobName);
+            }
+            
+            scheduler.triggerJob(jobKey);
+            log.info("Job triggered: {}", jobKey);
+            
+            return getJobResponseByKey(jobKey);
+        } catch (SchedulerException e) {
+            log.info("Error triggering job {}: {}", jobName, e.getMessage());
+            throw new JobOperationException(TRIGGER_ERROR_MESSAGE + e.getMessage(), e);
+        }
+    }
+
+    private JobKey getJobKey(String jobName, String groupName) {
+        if (groupName == null || groupName.isEmpty()) {
+            try {
+                // Если группа не указана, ищем задание во всех группах
+                for (String group : scheduler.getJobGroupNames()) {
+                    JobKey key = new JobKey(jobName, group);
+                    if (scheduler.checkExists(key)) {
+                        return key;
+                    }
+                }
+                // Если задание не найдено, используем группу по умолчанию
+                return new JobKey(jobName, DEFAULT_GROUP);
+            } catch (SchedulerException e) {
+                log.info("Error finding job key: {}", e.getMessage());
+                return new JobKey(jobName, DEFAULT_GROUP);
+            }
+        }
+        return new JobKey(jobName, groupName);
     }
 
     private JobResponse getJobResponseByKey(JobKey jobKey) {

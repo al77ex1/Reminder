@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.scheduler.dto.response.JobResponse;
 import org.scheduler.interceptor.ErrorMessage;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -81,4 +79,64 @@ public interface JobApi {
         content = @Content(schema = @Schema(implementation = JobResponse.class))
     )
     ResponseEntity<List<JobResponse>> getRunningJobs();
+    
+    @PostMapping("/{jobName}/pause")
+    @Operation(
+        summary = "Приостановить задание",
+        description = "Приостанавливает выполнение задания по его имени"
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Задание успешно приостановлено",
+        content = @Content(schema = @Schema(implementation = JobResponse.class))
+    )
+    @ApiResponse(
+        responseCode = "404", 
+        description = "Задание не найдено",
+        content = @Content(schema = @Schema(implementation = ErrorMessage.class))
+    )
+    ResponseEntity<JobResponse> pauseJob(
+        @PathVariable String jobName,
+        @RequestParam(required = false) String groupName
+    );
+    
+    @PostMapping("/{jobName}/resume")
+    @Operation(
+        summary = "Возобновить задание",
+        description = "Возобновляет выполнение приостановленного задания по его имени"
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Задание успешно возобновлено",
+        content = @Content(schema = @Schema(implementation = JobResponse.class))
+    )
+    @ApiResponse(
+        responseCode = "404", 
+        description = "Задание не найдено",
+        content = @Content(schema = @Schema(implementation = ErrorMessage.class))
+    )
+    ResponseEntity<JobResponse> resumeJob(
+        @PathVariable String jobName,
+        @RequestParam(required = false) String groupName
+    );
+    
+    @PostMapping("/{jobName}/trigger")
+    @Operation(
+        summary = "Запустить задание немедленно",
+        description = "Запускает задание немедленно, вне зависимости от его расписания"
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Задание успешно запущено",
+        content = @Content(schema = @Schema(implementation = JobResponse.class))
+    )
+    @ApiResponse(
+        responseCode = "404", 
+        description = "Задание не найдено",
+        content = @Content(schema = @Schema(implementation = ErrorMessage.class))
+    )
+    ResponseEntity<JobResponse> triggerJob(
+        @PathVariable String jobName,
+        @RequestParam(required = false) String groupName
+    );
 }

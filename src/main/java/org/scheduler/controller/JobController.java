@@ -16,6 +16,8 @@ import java.util.List;
 public class JobController implements JobApi {
 
     private final JobService jobService;
+    private static final String JOB_NOT_FOUND_MESSAGE = "Задание не найдено: ";
+    private static final String GROUP_NOT_FOUND_MESSAGE = "Группа заданий не найдена: ";
 
     @Override
     @PreAuthorize("hasAuthority('VIEW_NOTIFICATION') or hasAuthority('MANAGE_NOTIFICATION')")
@@ -29,7 +31,7 @@ public class JobController implements JobApi {
     public ResponseEntity<List<JobResponse>> getJobsByGroup(String groupName) {
         List<JobResponse> jobs = jobService.getJobsByGroup(groupName);
         if (jobs.isEmpty()) {
-            throw new EntityNotFoundException("Группа заданий не найдена: " + groupName);
+            throw new EntityNotFoundException(GROUP_NOT_FOUND_MESSAGE + groupName);
         }
         return ResponseEntity.ok(jobs);
     }
@@ -38,7 +40,7 @@ public class JobController implements JobApi {
     @PreAuthorize("hasAuthority('VIEW_NOTIFICATION') or hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<JobResponse> getJobByName(String jobName) {
         JobResponse job = jobService.getJobByName(jobName)
-                .orElseThrow(() -> new EntityNotFoundException("Задание не найдено: " + jobName));
+                .orElseThrow(() -> new EntityNotFoundException(JOB_NOT_FOUND_MESSAGE + jobName));
         return ResponseEntity.ok(job);
     }
 
@@ -47,5 +49,26 @@ public class JobController implements JobApi {
     public ResponseEntity<List<JobResponse>> getRunningJobs() {
         List<JobResponse> jobs = jobService.getRunningJobs();
         return ResponseEntity.ok(jobs);
+    }
+    
+    @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
+    public ResponseEntity<JobResponse> pauseJob(String jobName, String groupName) {
+        JobResponse job = jobService.pauseJob(jobName, groupName);
+        return ResponseEntity.ok(job);
+    }
+    
+    @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
+    public ResponseEntity<JobResponse> resumeJob(String jobName, String groupName) {
+        JobResponse job = jobService.resumeJob(jobName, groupName);
+        return ResponseEntity.ok(job);
+    }
+    
+    @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
+    public ResponseEntity<JobResponse> triggerJob(String jobName, String groupName) {
+        JobResponse job = jobService.triggerJob(jobName, groupName);
+        return ResponseEntity.ok(job);
     }
 }
