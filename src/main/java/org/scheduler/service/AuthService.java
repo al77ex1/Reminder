@@ -5,6 +5,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.scheduler.entity.Permission;
+import org.scheduler.entity.Role;
 import org.scheduler.entity.User;
 import org.scheduler.exception.ApplicationRuntimeException;
 import org.scheduler.repository.UserRepository;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -100,10 +103,18 @@ public class AuthService {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration * 1000);
         
+        List<String> roleNames = getRoleNames(user);
+        List<String> permissionNames = getPermissionNames(user);
+        
+        log.debug("Generating token for user: {}", user.getTelegramUserName());
+        log.debug("User roles: {}", roleNames);
+        log.debug("User permissions: {}", permissionNames);
+        
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("username", user.getTelegramUserName())
-                .claim("roles", getRoleNames(user))
+                .claim("roles", roleNames)
+                .claim("permissions", permissionNames)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
@@ -127,6 +138,19 @@ public class AuthService {
         List<String> roleNames = new ArrayList<>();
         user.getRoles().forEach(role -> roleNames.add(role.getName().toString()));
         return roleNames;
+    }
+    
+    private List<String> getPermissionNames(User user) {
+        Set<Permission> permissions = new HashSet<>();
+        
+        for (Role role : user.getRoles()) {
+            log.debug("Processing role: {}", role.getName());
+            permissions.addAll(role.getPermissions());
+        }
+        
+        return permissions.stream()
+                .map(Permission::getName)
+                .toList();
     }
     
     private Key getSigningKey() {

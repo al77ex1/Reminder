@@ -58,7 +58,9 @@ INSERT INTO permissions (name, description) VALUES
 ('MANAGE_NOTIFICATION', 'Управление уведомлениями'),
 ('MANAGE_USERS', 'Управление пользователями'),
 ('MANAGE_ROLES', 'Управление ролями и правами'),
-('VIEW_NOTIFICATION', 'Просмотр уведомлений');
+('VIEW_NOTIFICATION', 'Просмотр уведомлений'),
+('VIEW_USERS', 'Просмотр пользователей'),
+('VIEW_ROLES', 'Просмотр ролей');
 
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r, permissions p
