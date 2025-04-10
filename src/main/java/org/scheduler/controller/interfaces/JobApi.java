@@ -139,4 +139,42 @@ public interface JobApi {
         @PathVariable String jobName,
         @RequestParam(required = false) String groupName
     );
+    
+    @DeleteMapping("/{jobName}")
+    @Operation(
+        summary = "Удалить задание",
+        description = "Удаляет задание из планировщика по его имени"
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Задание успешно удалено"
+    )
+    @ApiResponse(
+        responseCode = "404", 
+        description = "Задание не найдено",
+        content = @Content(schema = @Schema(implementation = ErrorMessage.class))
+    )
+    ResponseEntity<Void> deleteJob(
+        @PathVariable String jobName,
+        @RequestParam(required = false) String groupName
+    );
+    
+    @PostMapping("/notifications/{notificationId}")
+    @Operation(
+        summary = "Создать задание на основе уведомления",
+        description = "Создает новое задание в планировщике на основе существующего уведомления"
+    )
+    @ApiResponse(
+        responseCode = "200", 
+        description = "Задание успешно создано",
+        content = @Content(schema = @Schema(implementation = JobResponse.class))
+    )
+    @ApiResponse(
+        responseCode = "404", 
+        description = "Уведомление не найдено",
+        content = @Content(schema = @Schema(implementation = ErrorMessage.class))
+    )
+    ResponseEntity<JobResponse> createJobFromNotification(
+        @PathVariable Integer notificationId
+    );
 }

@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.scheduler.dto.response.JobResponse;
+import org.scheduler.entity.Notification;
 import org.scheduler.exception.JobOperationException;
+import org.scheduler.jobs.TelegramMessageJob;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,6 +24,8 @@ public class JobService {
     private static final String PAUSE_ERROR_MESSAGE = "Ошибка при приостановке задания: ";
     private static final String RESUME_ERROR_MESSAGE = "Ошибка при возобновлении задания: ";
     private static final String TRIGGER_ERROR_MESSAGE = "Ошибка при запуске задания: ";
+    private static final String DELETE_ERROR_MESSAGE = "Ошибка при удалении задания: ";
+    private static final String CREATE_ERROR_MESSAGE = "Ошибка при создании задания из уведомления: ";
 
     public List<JobResponse> getAllJobs() {
         try {
@@ -147,6 +151,54 @@ public class JobService {
         } catch (SchedulerException e) {
             log.info("Error triggering job {}: {}", jobName, e.getMessage());
             throw new JobOperationException(TRIGGER_ERROR_MESSAGE + e.getMessage(), e);
+        }
+    }
+
+    public boolean deleteJob(String jobName, String groupName) {
+        try {
+            JobKey jobKey = getJobKey(jobName, groupName);
+            
+            if (!scheduler.checkExists(jobKey)) {
+                throw new EntityNotFoundException(JOB_NOT_FOUND_MESSAGE + jobName);
+            }
+            
+            boolean result = scheduler.deleteJob(jobKey);
+            log.info("Job deleted: {}, result: {}", jobKey, result);
+            
+            return result;
+        } catch (SchedulerException e) {
+            log.info("Error deleting job {}: {}", jobName, e.getMessage());
+            throw new JobOperationException(DELETE_ERROR_MESSAGE + e.getMessage(), e);
+        }
+    }
+    
+    public JobResponse createJobFromNotification(Notification notification) {
+        try {
+            // Создаем JobDetail
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put("notificationId", notification.getId());
+            jobDataMap.put("message", notification.getMessage());
+            
+            JobDetail jobDetail = JobBuilder.newJob(TelegramMessageJob.class)
+                    .withIdentity(notification.getJobName(), DEFAULT_GROUP)
+                    .withDescription("Задание для уведомления #" + notification.getId())
+                    .usingJobData(jobDataMap)
+                    .build();
+            
+            // Создаем CronTrigger
+            CronTrigger trigger = TriggerBuilder.newTrigger()
+                    .withIdentity(notification.getTriggerName(), DEFAULT_GROUP)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(notification.getCronSchedule()))
+                    .build();
+            
+            // Добавляем задание в планировщик
+            scheduler.scheduleJob(jobDetail, trigger);
+            log.info("Job created from notification: {}", notification.getId());
+            
+            return getJobResponseByKey(jobDetail.getKey());
+        } catch (SchedulerException e) {
+            log.info("Error creating job from notification {}: {}", notification.getId(), e.getMessage());
+            throw new JobOperationException(CREATE_ERROR_MESSAGE + e.getMessage(), e);
         }
     }
 
