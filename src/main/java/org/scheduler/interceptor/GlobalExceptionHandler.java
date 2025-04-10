@@ -2,6 +2,7 @@ package org.scheduler.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.scheduler.exception.ApplicationRuntimeException;
+import org.scheduler.exception.JobOperationException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorMessage> handlePropertyReferenceException(PropertyReferenceException ex, WebRequest request) {
         log.info("Invalid property reference: {}", ex.getMessage());
         return createErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    
+    @ExceptionHandler(JobOperationException.class)
+    public ResponseEntity<ErrorMessage> handleJobOperationException(JobOperationException ex, WebRequest request) {
+        log.info("Job operation error: {}", ex.getMessage());
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
     
     @ExceptionHandler(Exception.class)
