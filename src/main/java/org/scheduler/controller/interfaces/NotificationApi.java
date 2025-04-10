@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.scheduler.dto.request.NotificationRequest;
 import org.scheduler.dto.response.NotificationResponse;
@@ -21,7 +22,8 @@ public interface NotificationApi {
     @GetMapping
     @Operation(
         summary = "Получить список уведомлений",
-        description = "Предоставляет информацию о всех уведомлениях с поддержкой пагинации"
+        description = "Предоставляет информацию о всех уведомлениях с поддержкой пагинации",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponse(
         responseCode = "200", 
@@ -35,7 +37,8 @@ public interface NotificationApi {
     @GetMapping("/{id}")
     @Operation(
         summary = "Получить уведомление",
-        description = "Предоставляет информацию об уведомлении по его ID"
+        description = "Предоставляет информацию об уведомлении по его ID",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponse(
         responseCode = "200", 
@@ -54,7 +57,8 @@ public interface NotificationApi {
     @PostMapping
     @Operation(
         summary = "Создать новое уведомление",
-        description = "Создает новое уведомление с указанными параметрами"
+        description = "Создает новое уведомление с указанными параметрами",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponse(
         responseCode = "201", 
@@ -73,7 +77,8 @@ public interface NotificationApi {
     @PutMapping("/{id}")
     @Operation(
         summary = "Обновить уведомление",
-        description = "Обновляет существующее уведомление по его ID"
+        description = "Обновляет существующее уведомление по его ID",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponse(
         responseCode = "200", 
@@ -98,7 +103,8 @@ public interface NotificationApi {
     @DeleteMapping("/{id}")
     @Operation(
         summary = "Удалить уведомление",
-        description = "Удаляет уведомление по его ID"
+        description = "Удаляет уведомление по его ID",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponse(responseCode = "204", description = "Уведомление успешно удалено")
     @ApiResponse(

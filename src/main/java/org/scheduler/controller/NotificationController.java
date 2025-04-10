@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,6 +21,7 @@ public class NotificationController implements NotificationApi {
     private final NotificationService notificationService;
 
     @Override
+    @PreAuthorize("hasAuthority('VIEW_NOTIFICATION') or hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<Page<NotificationResponse>> getNotificationByJobName(Pageable params) {
         Page<Notification> notificationsPage = notificationService.getAllNotifications(params);
         
@@ -35,12 +37,14 @@ public class NotificationController implements NotificationApi {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('VIEW_NOTIFICATION') or hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<NotificationResponse> getNotificationById(Integer id) {
         Notification notification = notificationService.getNotificationById(id.longValue());
         return ResponseEntity.ok(NotificationMapper.toResponseStatic(notification));
     }
 
     @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<NotificationResponse> createNotification(NotificationRequest request) {
         Notification notification = NotificationMapper.toEntityStatic(request);
         Notification savedNotification = notificationService.createNotification(notification);
@@ -49,6 +53,7 @@ public class NotificationController implements NotificationApi {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<NotificationResponse> updateNotification(Integer id, NotificationRequest request) {
         Notification existingNotification = notificationService.getNotificationById(id.longValue());
         NotificationMapper.updateEntityStatic(existingNotification, request);
@@ -58,6 +63,7 @@ public class NotificationController implements NotificationApi {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('MANAGE_NOTIFICATION')")
     public ResponseEntity<Void> deleteNotification(Integer id) {
         notificationService.deleteNotification(id.longValue());
         return ResponseEntity.noContent().build();
