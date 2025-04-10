@@ -11,7 +11,7 @@ CREATE TABLE notification (
 );
 
 CREATE TABLE users (
-    id              SERIAL PRIMARY KEY,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            VARCHAR(100) NOT NULL,
     last_name       VARCHAR(100),
     telegram_user_name VARCHAR(100) UNIQUE,
@@ -42,7 +42,7 @@ CREATE TABLE role_permissions (
 );
 
 CREATE TABLE user_roles (
-    user_id         BIGINT NOT NULL,
+    user_id         UUID NOT NULL,
     role_id         BIGINT NOT NULL,
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,

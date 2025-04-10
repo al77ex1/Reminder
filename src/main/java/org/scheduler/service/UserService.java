@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserById(Long id) {
+    public User getUserById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
@@ -74,7 +75,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(Long id, User user) {
+    public User updateUser(UUID id, User user) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         
@@ -100,7 +101,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new EntityNotFoundException(USER_NOT_FOUND);
         }
@@ -108,7 +109,7 @@ public class UserService {
     }
 
     @Transactional
-    public User addRoleToUser(Long userId, Role.RoleName roleName) {
+    public User addRoleToUser(UUID userId, Role.RoleName roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         
@@ -134,11 +135,11 @@ public class UserService {
     }
 
     @Transactional
-    public User removeRoleFromUser(Long userId, Role.RoleName roleName) {
+    public User removeRoleFromUser(UUID userId, Role.RoleName roleName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         
-        if (!roleRepository.findByName(roleName).isPresent()) {
+        if (roleRepository.findByName(roleName).isEmpty()) {
             throw new EntityNotFoundException("Роль не найдена");
         }
         
@@ -154,7 +155,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Role> getUserRoles(Long userId) {
+    public Set<Role> getUserRoles(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
         

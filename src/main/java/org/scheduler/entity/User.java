@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -18,9 +19,9 @@ import java.util.Set;
 @Builder
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, columnDefinition = "UUID")
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;

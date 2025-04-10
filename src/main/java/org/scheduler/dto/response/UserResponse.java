@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Response DTO for User operations
@@ -18,8 +19,8 @@ import java.util.Set;
 public class UserResponse {
     
     @Schema(description = "Уникальный идентификатор пользователя", 
-            example = "1")
-    private Long id;
+            example = "123e4567-e89b-12d3-a456-426614174000")
+    private UUID id;
     
     @Schema(description = "Имя пользователя", 
             example = "Иван")

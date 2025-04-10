@@ -11,6 +11,7 @@ import org.scheduler.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", imports = {LocalDateTime.class})
@@ -49,6 +50,14 @@ public interface UserMapper {
                 .flatMap(role -> role.getPermissions().stream())
                 .map(Permission::getName)
                 .collect(Collectors.toSet());
+    }
+    
+    default String uuidToString(UUID uuid) {
+        return uuid != null ? uuid.toString() : null;
+    }
+    
+    default UUID stringToUuid(String uuid) {
+        return uuid != null ? UUID.fromString(uuid) : null;
     }
     
     static UserMapper getInstance() {

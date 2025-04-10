@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Tag(name = "Users", description = "Операции связанные с пользователями")
 @RequestMapping("/api/v1/users")
@@ -53,7 +54,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<UserResponse> getUserById(
-        @Parameter(description = "ID пользователя") @PathVariable Long id
+        @Parameter(description = "ID пользователя") @PathVariable UUID id
     );
 
     @GetMapping("/telegram-username/{telegramUserName}")
@@ -115,7 +116,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<UserResponse> updateUser(
-        @Parameter(description = "ID пользователя") @PathVariable Long id,
+        @Parameter(description = "ID пользователя") @PathVariable UUID id,
         @Parameter(description = "Обновленные данные пользователя") @RequestBody UserRequest request
     );
 
@@ -131,7 +132,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<Void> deleteUser(
-        @Parameter(description = "ID пользователя") @PathVariable Long id
+        @Parameter(description = "ID пользователя") @PathVariable UUID id
     );
 
     @GetMapping("/{id}/roles")
@@ -149,7 +150,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<Set<String>> getUserRoles(
-        @Parameter(description = "ID пользователя") @PathVariable Long id
+        @Parameter(description = "ID пользователя") @PathVariable UUID id
     );
 
     @PostMapping("/{id}/roles/{roleName}")
@@ -173,7 +174,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<UserResponse> addRoleToUser(
-        @Parameter(description = "ID пользователя") @PathVariable Long id,
+        @Parameter(description = "ID пользователя") @PathVariable UUID id,
         @Parameter(description = "Имя роли") @PathVariable Role.RoleName roleName
     );
 
@@ -198,7 +199,7 @@ public interface UserApi {
         content = @Content(schema = @Schema(implementation = ErrorMessage.class))
     )
     ResponseEntity<UserResponse> removeRoleFromUser(
-        @Parameter(description = "ID пользователя") @PathVariable Long id,
+        @Parameter(description = "ID пользователя") @PathVariable UUID id,
         @Parameter(description = "Имя роли") @PathVariable Role.RoleName roleName
     );
 }

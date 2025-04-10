@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,7 +34,7 @@ public class UserController implements UserApi {
 
     @Override
     @PreAuthorize("hasAuthority('VIEW_USERS') or hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<UserResponse> getUserById(Long id) {
+    public ResponseEntity<UserResponse> getUserById(UUID id) {
         User user = userService.getUserById(id);
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
@@ -54,7 +55,7 @@ public class UserController implements UserApi {
 
     @Override
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<UserResponse> updateUser(Long id, UserRequest request) {
+    public ResponseEntity<UserResponse> updateUser(UUID id, UserRequest request) {
         User existingUser = userService.getUserById(id);
         userMapper.updateEntity(existingUser, request);
         User updatedUser = userService.updateUser(id, existingUser);
@@ -63,14 +64,14 @@ public class UserController implements UserApi {
 
     @Override
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<Void> deleteUser(Long id) {
+    public ResponseEntity<Void> deleteUser(UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     @PreAuthorize("hasAuthority('VIEW_USERS') or hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<Set<String>> getUserRoles(Long id) {
+    public ResponseEntity<Set<String>> getUserRoles(UUID id) {
         Set<Role> roles = userService.getUserRoles(id);
         Set<String> roleNames = roles.stream()
                 .map(role -> role.getName().name())
@@ -80,14 +81,14 @@ public class UserController implements UserApi {
 
     @Override
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<UserResponse> addRoleToUser(Long id, Role.RoleName roleName) {
+    public ResponseEntity<UserResponse> addRoleToUser(UUID id, Role.RoleName roleName) {
         User user = userService.addRoleToUser(id, roleName);
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @Override
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
-    public ResponseEntity<UserResponse> removeRoleFromUser(Long id, Role.RoleName roleName) {
+    public ResponseEntity<UserResponse> removeRoleFromUser(UUID id, Role.RoleName roleName) {
         User user = userService.removeRoleFromUser(id, roleName);
         return ResponseEntity.ok(userMapper.toResponse(user));
     }
