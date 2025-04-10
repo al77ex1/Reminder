@@ -68,7 +68,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             
             execute(new SendMessage(chatId.toString(), "Ссылка для авторизации: " + authLink));
         } catch (TelegramApiException e) {
-            log.error("Error sending telegram message: {}", e.getMessage(), e);
+            log.info("Error sending telegram message: {}", e.getMessage());
         }
     }
     
@@ -102,11 +102,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             
             execute(new SendMessage(chatId.toString(), "Регистрация успешно завершена!"));
         } catch (Exception e) {
-            log.error("Error during registration: {}", e.getMessage(), e);
+            log.info("Error during registration: {}", e.getMessage());
             try {
                 execute(new SendMessage(chatId.toString(), "Произошла ошибка при регистрации. Пожалуйста, попробуйте позже."));
             } catch (TelegramApiException ex) {
-                log.error("Error sending error message: {}", ex.getMessage(), ex);
+                log.info("Error sending error message: {}", ex.getMessage());
             }
         }
     }
@@ -137,7 +137,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            log.error("Error sending start message: {}", e.getMessage(), e);
+            log.info("Error sending start message: {}", e.getMessage());
         }
     }
 
@@ -155,7 +155,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(new SendMessage(System.getProperty("BOT_CHAT_ID"), message));
         } catch (TelegramApiException e) {
-            log.error("Error sending telegram message: {}", e.getMessage(), e);
+            log.info("Error sending telegram message: {}", e.getMessage());
         }
     }
 }
