@@ -50,7 +50,7 @@ public class AuthService {
             String oneTimeToken = generateOneTimeToken(user.getTelegramUserName());
             return frontendUrl + "/auth?token=" + oneTimeToken;
         } else {
-            return "User not found. Contact administrator to register.";
+            return "Пользователь не зарегистрирован. Сначала зарегистрируйтесь.";
         }
     }
     

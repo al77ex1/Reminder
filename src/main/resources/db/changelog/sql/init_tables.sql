@@ -55,12 +55,10 @@ INSERT INTO roles (name, description) VALUES
 ('REGENT', 'Регент с доступом к управлению хором');
 
 INSERT INTO permissions (name, description) VALUES 
-('CREATE_NOTIFICATION', 'Создание уведомлений'),
-('EDIT_NOTIFICATION', 'Редактирование уведомлений'),
-('DELETE_NOTIFICATION', 'Удаление уведомлений'),
-('VIEW_NOTIFICATION', 'Просмотр уведомлений'),
+('MANAGE_NOTIFICATION', 'Управление уведомлениями'),
 ('MANAGE_USERS', 'Управление пользователями'),
-('MANAGE_ROLES', 'Управление ролями и правами');
+('MANAGE_ROLES', 'Управление ролями и правами'),
+('VIEW_NOTIFICATION', 'Просмотр уведомлений');
 
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r, permissions p

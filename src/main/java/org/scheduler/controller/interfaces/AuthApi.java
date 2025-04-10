@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Authentication", description = "Operations related to authentication")
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public interface AuthApi {
 
     @GetMapping("/token")
